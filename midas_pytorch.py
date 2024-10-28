@@ -23,10 +23,10 @@ class classifierNN(nn.Module):
         self.linearHidden = nn.Linear(nn_hlayer, nn_hlayer)
         self.linearOut = nn.Linear(nn_hlayer, outsize)
         
-    def forward(x):
+    def forward(self, x):
         x = F.relu(self.drop(self.linearIn(x)))
         x = F.relu(self.drop(self.linearHidden(x)))
-        x = F.sigmoid(self.linearOut(x))
+        x = torch.sigmoid(self.linearOut(x)) 
         return x
 
 
