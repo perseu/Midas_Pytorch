@@ -9,7 +9,25 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import torch
+import torch.nn as nn
+from torch import optim
+from torch.nn import functional as F
 
+
+class classifierNN(nn.Module):
+    def __init__(self, insize, outsize, nn_hlayer, p=0):
+        super(classifierNN, self).__init__()
+        self.drop = nn.Dropout(p)
+        self.linearIn = nn.Linear(insize, nn_hlayer)
+        self.linearHidden = nn.Linear(nn_hlayer, nn_hlayer)
+        self.linearOut = nn.Linear(nn_hlayer, outsize)
+        
+    def forward(x):
+        x = F.relu(self.drop(self.linearIn(x)))
+        x = F.relu(self.drop(self.linearHidden(x)))
+        x = F.sigmoid(self.linearOut(x))
+        return x
 
 
 
@@ -101,6 +119,13 @@ plt.show()
 # sns.pairplot(df_filtered.drop('customer_id', axis=1), diag_kind="kde", hue='loan_intent', corner=True)
 # plt.suptitle('Pairplot of Numerical Features', y=1.02)  # Adjusting the title position
 # plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.regplot(data=df_filtered, x='customer_income', y='loan_amnt', ci=95, marker='+')  # 'ci=None' to remove confidence interval
+plt.title('Loan Amount vs Customer Income')
+plt.xlabel('Customer Income')
+plt.ylabel('Loan Amount')
+plt.show()
 
 print('Ending exploratory plots!!!\n')
 
