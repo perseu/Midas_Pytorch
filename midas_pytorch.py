@@ -96,11 +96,11 @@ plt.title('Loan Amount by Loan Grade')
 plt.xticks(rotation=45)
 plt.show()
 
-numerical_cols = df_filtered.select_dtypes(include=['float64', 'int64']).columns
-plt.figure(figsize=(12, 10))
-sns.pairplot(df_filtered, diag_kind="kde", hue='loan_intent', corner=True)
-plt.suptitle('Pairplot of Numerical Features', y=1.02)  # Adjusting the title position
-plt.show()
+# numerical_cols = df_filtered.select_dtypes(include=['float64', 'int64']).columns
+# plt.figure(figsize=(12, 10))
+# sns.pairplot(df_filtered.drop('customer_id', axis=1), diag_kind="kde", hue='loan_intent', corner=True)
+# plt.suptitle('Pairplot of Numerical Features', y=1.02)  # Adjusting the title position
+# plt.show()
 
 print('Ending exploratory plots!!!\n')
 
