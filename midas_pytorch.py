@@ -13,8 +13,44 @@ import torch
 import torch.nn as nn
 from torch import optim
 from torch.nn import functional as F
+from torch.utils.data import Dataset, DataLoader
 
 
+# Dataset builder class
+class Data(Dataset):
+    def __init__(self, df, target_col):
+        # Dropping client ID
+        df = df.drop(['customer_id', 'historical_default'], axis=1)
+        to_dummies = ['loan_intent', 'loan_grade', 'home_ownership']
+        df_final = pd.get_dummies(data=df, columns=to_dummies)
+        bool_cols = df_final.select_dtypes(include='bool').columns
+        df_final[bool_cols] = df_final[bool_cols].astype(float)
+        
+        # Prepared to separate the features and targets.
+        df_feat = df_final[['customer_age', 'customer_income', 'employment_duration', 'loan_amnt',
+                            'loan_int_rate', 'term_years', 'cred_hist_length', 'loan_intent_DEBTCONSOLIDATION', 
+                            'loan_intent_EDUCATION', 'loan_intent_HOMEIMPROVEMENT', 
+                            'loan_intent_MEDICAL', 'loan_intent_PERSONAL', 'loan_intent_VENTURE',
+                            'loan_grade_A', 'loan_grade_B', 'loan_grade_C', 'loan_grade_D',
+                            'loan_grade_E', 'home_ownership_MORTGAGE', 'home_ownership_OTHER',
+                            'home_ownership_OWN', 'home_ownership_RENT']]
+        
+        df_target = df_final['Current_loan_status']
+        df_target.replace({'NO DEFAULT': 1, 'DEFAULT': 0}, inplace=True)
+        
+        # Converting to torch tensors.
+        self.x = torch.from_numpy(df_feat.to_numpy()).type(torch.FloatTensor)
+        self.y = torch.from_numpy(df_target.to_numpy()).type(torch.LongTensor)
+        
+        
+    def __len__(self):
+        return len(self.y)
+    
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
+
+
+# The neural network class
 class classifierNN(nn.Module):
     def __init__(self, insize, outsize, nn_hlayer, p=0):
         super(classifierNN, self).__init__()
@@ -128,4 +164,8 @@ plt.ylabel('Loan Amount')
 plt.show()
 
 print('Ending exploratory plots!!!\n')
+
+# Extracting the cases that need prediction
+df_to_predict = df_filtered[df_filtered['Current_loan_status'].isna()]
+df_filtered = df_filtered.dropna(subset=['Current_loan_status'])
 
