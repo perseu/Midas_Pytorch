@@ -180,3 +180,13 @@ traindata, validationdata = random_split(dataset, [train_size, validation_size])
 trainLoader = DataLoader(dataset=traindata, batch_size=500, shuffle=True)
 validLoader = DataLoader(dataset=validationdata, batch_size=500, shuffle=False)
 
+# Creating a model instance
+input_size = traindata[0][0].numel()
+model = classifierNN(input_size, 1, 256, p=0.1)
+
+# Creating criterion, and optimizer.
+lr = 0.1
+momentum = 0.07
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+
