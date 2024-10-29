@@ -169,6 +169,14 @@ print('Ending exploratory plots!!!\n')
 df_to_predict = df_filtered[df_filtered['Current_loan_status'].isna()]
 df_filtered = df_filtered.dropna(subset=['Current_loan_status'])
 
-# Splitting the Dataset into a Training Dataset and a Validation Dataset, with a rate of 80% for Training and 20% for Validation.
+# Creating the Dataset instance.
 dataset = Data(df_filtered, 'Current_loan_status')
+
+# Splitting the Dataset into a Training Dataset and a Validation Dataset, with a rate of 80% for Training and 20% for Validation.
+train_size = int(0.8*len(dataset))
+validation_size = int(len(dataset) - train_size)
+
+traindata, validationdata = random_split(dataset, [train_size, validation_size])
+trainLoader = DataLoader(dataset=traindata, batch_size=500, shuffle=True)
+validLoader = DataLoader(dataset=validationdata, batch_size=500, shuffle=False)
 
