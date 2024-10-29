@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 from torch.nn import functional as F
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 
 
 # Dataset builder class
@@ -35,7 +35,7 @@ class Data(Dataset):
                             'loan_grade_E', 'home_ownership_MORTGAGE', 'home_ownership_OTHER',
                             'home_ownership_OWN', 'home_ownership_RENT']]
         
-        df_target = df_final['Current_loan_status']
+        df_target = df_final[target_col]
         df_target.replace({'NO DEFAULT': 1, 'DEFAULT': 0}, inplace=True)
         
         # Converting to torch tensors.
@@ -168,4 +168,7 @@ print('Ending exploratory plots!!!\n')
 # Extracting the cases that need prediction
 df_to_predict = df_filtered[df_filtered['Current_loan_status'].isna()]
 df_filtered = df_filtered.dropna(subset=['Current_loan_status'])
+
+# Splitting the Dataset into a Training Dataset and a Validation Dataset, with a rate of 80% for Training and 20% for Validation.
+dataset = Data(df_filtered, 'Current_loan_status')
 
