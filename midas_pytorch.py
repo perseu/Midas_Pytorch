@@ -40,7 +40,7 @@ class Data(Dataset):
         
         # Converting to torch tensors.
         self.x = torch.from_numpy(df_feat.to_numpy()).type(torch.FloatTensor)
-        self.y = torch.from_numpy(df_target.to_numpy()).type(torch.LongTensor)
+        self.y = torch.from_numpy(df_target.to_numpy()).type(torch.FloatTensor)
         
         
     def __len__(self):
@@ -156,12 +156,12 @@ plt.show()
 # plt.suptitle('Pairplot of Numerical Features', y=1.02)  # Adjusting the title position
 # plt.show()
 
-plt.figure(figsize=(10, 6))
-sns.regplot(data=df_filtered, x='customer_income', y='loan_amnt', ci=95, marker='+')  # 'ci=None' to remove confidence interval
-plt.title('Loan Amount vs Customer Income')
-plt.xlabel('Customer Income')
-plt.ylabel('Loan Amount')
-plt.show()
+# plt.figure(figsize=(10, 6))
+# sns.regplot(data=df_filtered, x='customer_income', y='loan_amnt', ci=95, marker='+')  # 'ci=None' to remove confidence interval
+# plt.title('Loan Amount vs Customer Income')
+# plt.xlabel('Customer Income')
+# plt.ylabel('Loan Amount')
+# plt.show()
 
 print('Ending exploratory plots!!!\n')
 
@@ -187,6 +187,21 @@ model = classifierNN(input_size, 1, 256, p=0.1)
 # Creating criterion, and optimizer.
 lr = 0.1
 momentum = 0.07
-criterion = nn.CrossEntropyLoss()
+criterion = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
+# Performance measuring variables, loss, accuracy and number of epochs.
+LOSS = []
+accuracy = []
+epochs = 100
+
+# Training cycle
+for epoch in range(epochs):
+    for x, y in trainLoader:
+        model.train()
+        optimizer.zero_grad()
+        yhat = model(x)
+        loss = criterion(yhat, y.view(-1, 1))
+        loss.backward()
+        optimizer.step()
+    LOSS.append(loss.item())
