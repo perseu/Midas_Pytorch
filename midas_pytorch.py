@@ -14,20 +14,21 @@ import torch.nn as nn
 from torch import optim
 from torch.nn import functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
+from sklearn.preprocessing import MinMaxScaler
 
 
 # Dataset builder class
 class Data(Dataset):
     def __init__(self, df, target_col):
         # Dropping client ID
-        df = df.drop(['customer_id', 'historical_default'], axis=1)
-        to_dummies = ['loan_intent', 'loan_grade', 'home_ownership']
-        df_final = pd.get_dummies(data=df, columns=to_dummies)
-        bool_cols = df_final.select_dtypes(include='bool').columns
-        df_final[bool_cols] = df_final[bool_cols].astype(float)
+        #df = df.drop(['customer_id', 'historical_default'], axis=1)
+        #to_dummies = ['loan_intent', 'loan_grade', 'home_ownership']
+        #df_final = pd.get_dummies(data=df, columns=to_dummies)
+        #bool_cols = df_final.select_dtypes(include='bool').columns
+        #df_final[bool_cols] = df_final[bool_cols].astype(float)
         
         # Prepared to separate the features and targets.
-        df_feat = df_final[['customer_age', 'customer_income', 'employment_duration', 'loan_amnt',
+        df_feat = df[['customer_age', 'customer_income', 'employment_duration', 'loan_amnt',
                             'loan_int_rate', 'term_years', 'cred_hist_length', 'loan_intent_DEBTCONSOLIDATION', 
                             'loan_intent_EDUCATION', 'loan_intent_HOMEIMPROVEMENT', 
                             'loan_intent_MEDICAL', 'loan_intent_PERSONAL', 'loan_intent_VENTURE',
@@ -35,7 +36,7 @@ class Data(Dataset):
                             'loan_grade_E', 'home_ownership_MORTGAGE', 'home_ownership_OTHER',
                             'home_ownership_OWN', 'home_ownership_RENT']]
         
-        df_target = df_final[target_col]
+        df_target = df[target_col]
         df_target.replace({'NO DEFAULT': 1, 'DEFAULT': 0}, inplace=True)
         
         # Converting to torch tensors.
@@ -57,11 +58,13 @@ class classifierNN(nn.Module):
         self.drop = nn.Dropout(p)
         self.linearIn = nn.Linear(insize, nn_hlayer)
         self.linearHidden = nn.Linear(nn_hlayer, nn_hlayer)
+        #self.linearHidden2 = nn.Linear(nn_hlayer, nn_hlayer)
         self.linearOut = nn.Linear(nn_hlayer, outsize)
         
     def forward(self, x):
         x = F.relu(self.drop(self.linearIn(x)))
         x = F.relu(self.drop(self.linearHidden(x)))
+        #x = F.relu(self.drop(self.linearHidden2(x)))
         x = torch.sigmoid(self.linearOut(x)) 
         return x
 
@@ -165,12 +168,32 @@ plt.show()
 
 print('Ending exploratory plots!!!\n')
 
+#Cleaning up data before the rest.
+df_filtered = df_filtered.drop(['customer_id', 'historical_default'], axis=1)  # Dropping client_id and historical_default. client_id does not influence the outcome and historical_data is useless it has not enough information.
+to_dummies = ['loan_intent', 'loan_grade', 'home_ownership']
+df_filtered = pd.get_dummies(data=df_filtered, columns=to_dummies)
+bool_cols = df_filtered.select_dtypes(include='bool').columns
+df_filtered[bool_cols] = df_filtered[bool_cols].astype(float)
+
 # Extracting the cases that need prediction
 df_to_predict = df_filtered[df_filtered['Current_loan_status'].isna()]
-df_filtered = df_filtered.dropna(subset=['Current_loan_status'])
+df_filtered = df_filtered.dropna(subset=['Current_loan_status'], axis=0).reset_index(drop=True)
+
+# Dropping all rows that contain NaN
+df_filtered = df_filtered.dropna().reset_index(drop=True)
+
+
+# Normalizing values to stabilize the response of the network.
+
+scaler = MinMaxScaler()
+res=list(df_filtered.columns)
+res.remove('Current_loan_status')
+df_normalized = scaler.fit_transform(df_filtered[res].copy())
+df_normalized = pd.DataFrame(df_normalized, columns=res)
+df_normalized['Current_loan_status'] = df_filtered['Current_loan_status']
 
 # Creating the Dataset instance.
-dataset = Data(df_filtered, 'Current_loan_status')
+dataset = Data(df_normalized, 'Current_loan_status')
 
 # Splitting the Dataset into a Training Dataset and a Validation Dataset, with a rate of 80% for Training and 20% for Validation.
 train_size = int(0.8*len(dataset))
@@ -182,13 +205,13 @@ validLoader = DataLoader(dataset=validationdata, batch_size=500, shuffle=False)
 
 # Creating a model instance
 input_size = traindata[0][0].numel()
-model = classifierNN(input_size, 1, 256, p=0.1)
+model = classifierNN(input_size, 1, 64, p=0.5)
 
 # Creating criterion, and optimizer.
 lr = 0.1
-momentum = 0.07
+momentum = 0.01
 criterion = nn.BCEWithLogitsLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 # Performance measuring variables, loss, accuracy and number of epochs.
 LOSS = []
@@ -198,6 +221,7 @@ epochs = 100
 # Training cycle
 for epoch in range(epochs):
     for x, y in trainLoader:
+        x, y = x.float(), y.float()
         model.train()
         optimizer.zero_grad()
         yhat = model(x)
@@ -205,3 +229,12 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
     LOSS.append(loss.item())
+    
+plt.figure(figsize=(10, 5))
+plt.plot(LOSS, label='Training Loss', color='blue')
+plt.title('Training Loss over Epochs')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.grid(True)
+plt.show()
