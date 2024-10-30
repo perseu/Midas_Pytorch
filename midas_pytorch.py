@@ -200,15 +200,15 @@ train_size = int(0.8*len(dataset))
 validation_size = int(len(dataset) - train_size)
 
 traindata, validationdata = random_split(dataset, [train_size, validation_size])
-trainLoader = DataLoader(dataset=traindata, batch_size=500, shuffle=True)
-validLoader = DataLoader(dataset=validationdata, batch_size=500, shuffle=False)
+trainLoader = DataLoader(dataset=traindata, batch_size=256, shuffle=True)
+validLoader = DataLoader(dataset=validationdata, batch_size=256, shuffle=False)
 
 # Creating a model instance
 input_size = traindata[0][0].numel()
 model = classifierNN(input_size, 1, 64, p=0.5)
 
 # Creating criterion, and optimizer.
-lr = 0.1
+lr = 0.0001
 momentum = 0.01
 criterion = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -216,7 +216,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 # Performance measuring variables, loss, accuracy and number of epochs.
 LOSS = []
 accuracy = []
-epochs = 100
+epochs = 500
 
 # Training cycle
 for epoch in range(epochs):
