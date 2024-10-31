@@ -15,6 +15,7 @@ from torch import optim
 from torch.nn import functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 
 # Dataset builder class
@@ -53,18 +54,20 @@ class Data(Dataset):
 
 # The neural network class
 class classifierNN(nn.Module):
-    def __init__(self, insize, outsize, nn_hlayer, p=0):
+    def __init__(self, insize, outsize, nn_hlayer, p=0.2):
         super(classifierNN, self).__init__()
         self.drop = nn.Dropout(p)
         self.linearIn = nn.Linear(insize, nn_hlayer)
         self.linearHidden = nn.Linear(nn_hlayer, nn_hlayer)
         self.linearHidden2 = nn.Linear(nn_hlayer, nn_hlayer)
+        self.linearHidden3 = nn.Linear(nn_hlayer, nn_hlayer)
         self.linearOut = nn.Linear(nn_hlayer, outsize)
         
     def forward(self, x):
-        x = F.relu(self.drop(self.linearIn(x)))
+        x = F.relu(self.linearIn(x))
         x = F.relu(self.drop(self.linearHidden(x)))
         x = F.relu(self.drop(self.linearHidden2(x)))
+        x = F.relu(self.drop(self.linearHidden3(x)))
         x = torch.sigmoid(self.linearOut(x)) 
         return x
 
@@ -205,7 +208,7 @@ validLoader = DataLoader(dataset=validationdata, batch_size=512, shuffle=False)
 
 # Creating a model instance
 input_size = traindata[0][0].numel()
-model = classifierNN(input_size, 1, 512, p=0.0)
+model = classifierNN(input_size, 1, 1024, p=0.2)
 
 # Creating criterion, and optimizer.
 lr = 0.00001
@@ -216,7 +219,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=lr) #, momentum=momentum)
 # Performance measuring variables, loss, accuracy and number of epochs.
 LOSS = []
 accuracy = []
-epochs = 2000
+epochs = 1000
 
 # Training cycle
 start_time = time.time()
