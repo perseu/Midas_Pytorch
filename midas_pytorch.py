@@ -4,7 +4,7 @@ Created on Tue Sep 24 19:39:34 2024
 
 @author: JMSA
 """
-
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -58,13 +58,13 @@ class classifierNN(nn.Module):
         self.drop = nn.Dropout(p)
         self.linearIn = nn.Linear(insize, nn_hlayer)
         self.linearHidden = nn.Linear(nn_hlayer, nn_hlayer)
-        #self.linearHidden2 = nn.Linear(nn_hlayer, nn_hlayer)
+        self.linearHidden2 = nn.Linear(nn_hlayer, nn_hlayer)
         self.linearOut = nn.Linear(nn_hlayer, outsize)
         
     def forward(self, x):
         x = F.relu(self.drop(self.linearIn(x)))
         x = F.relu(self.drop(self.linearHidden(x)))
-        #x = F.relu(self.drop(self.linearHidden2(x)))
+        x = F.relu(self.drop(self.linearHidden2(x)))
         x = torch.sigmoid(self.linearOut(x)) 
         return x
 
@@ -201,24 +201,25 @@ validation_size = int(len(dataset) - train_size)
 
 traindata, validationdata = random_split(dataset, [train_size, validation_size])
 trainLoader = DataLoader(dataset=traindata, batch_size=256, shuffle=True)
-validLoader = DataLoader(dataset=validationdata, batch_size=256, shuffle=False)
+validLoader = DataLoader(dataset=validationdata, batch_size=512, shuffle=False)
 
 # Creating a model instance
 input_size = traindata[0][0].numel()
-model = classifierNN(input_size, 1, 64, p=0.5)
+model = classifierNN(input_size, 1, 512, p=0.0)
 
 # Creating criterion, and optimizer.
-lr = 0.0001
-momentum = 0.01
+lr = 0.00001
+momentum = 0.000005
 criterion = nn.BCEWithLogitsLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr) #, momentum=momentum)
 
 # Performance measuring variables, loss, accuracy and number of epochs.
 LOSS = []
 accuracy = []
-epochs = 500
+epochs = 2000
 
 # Training cycle
+start_time = time.time()
 for epoch in range(epochs):
     for x, y in trainLoader:
         x, y = x.float(), y.float()
@@ -229,12 +230,21 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
     LOSS.append(loss.item())
-    
+    yhat2 = model(x)
+    y2 = (yhat2 >= 0.5).float()
+    accuracy.append((yhat2.view(-1) == y.view(-1)).float().mean())
+ 
+end_time = time.time()   
+total_time = end_time - start_time
+print(f"Training time: {total_time:.2f} seconds")
+ 
 plt.figure(figsize=(10, 5))
 plt.plot(LOSS, label='Training Loss', color='blue')
-plt.title('Training Loss over Epochs')
+plt.plot(accuracy, label='Training accuracy', color='red')
+plt.title('Training Loss and Accuracy over Epochs')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend()
 plt.grid(True)
 plt.show()
+
