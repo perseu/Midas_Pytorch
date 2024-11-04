@@ -276,15 +276,14 @@ trainValStatistics = pd.DataFrame({'Train Accuracy Average':accavg, 'Train Accur
                                    'Validation Accuracy Average': valAccuracyAvg, 'Validation Accuracy std': valAccuracystd, 
                                    'Validation Loss Average': valLOSSavg, 'Validation Loss Std':valLOSSstd})
 
-plt.figure(figsize=(10,5))
- 
-# plt.figure(figsize=(10, 5))
-# plt.plot(LOSS, label='Training Loss', color='blue')
-# plt.plot(accuracy, label='Training accuracy', color='red')
-# plt.title('Training Loss and Accuracy over Epochs')
-# plt.xlabel('Epochs')
-# plt.ylabel('Loss')
-# plt.legend()
-# plt.grid(True)
-# plt.show()
+plt.figure(figsize=(14,10))
+sns.lineplot(data=trainValStatistics, x=x, y='Train Accuracy Average', label='Training Accuracy Average')
+plt.fill_between(x, trainValStatistics['Train Accuracy Average'] - trainValStatistics['Train Accuracy Std'], trainValStatistics['Train Accuracy Average'] + trainValStatistics['Train Accuracy Std'], alpha=0.3, label='Train Accuracy StD')
+sns.lineplot(data=trainValStatistics, x=x, y='Train Loss Average', label='Training Loss Average')
+plt.fill_between(x, trainValStatistics['Train Loss Average'] - trainValStatistics['Train Loss Std'], trainValStatistics['Train Loss Average'] + trainValStatistics['Train Loss Std'], alpha=0.3, label='Train Loss StD')
+sns.lineplot(data=trainValStatistics, x=x, y='Validation Accuracy Average', label='Validation Accuracy Average')
+plt.fill_between(x, trainValStatistics['Validation Accuracy Average'] - trainValStatistics['Validation Accuracy std'], trainValStatistics['Validation Accuracy Average'] + trainValStatistics['Validation Accuracy std'], alpha=0.3, label='Validation Accuracy StD')
+sns.lineplot(data=trainValStatistics, x=x, y='Validation Loss Average', label='Validation Loss Average')
+plt.fill_between(x, trainValStatistics['Validation Loss Average'] - trainValStatistics['Validation Loss Std'], trainValStatistics['Validation Loss Average'] + trainValStatistics['Validation Loss Std'], alpha=0.3, label='Validation Loss StD')
+
 
