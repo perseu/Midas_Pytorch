@@ -276,6 +276,7 @@ trainValStatistics = pd.DataFrame({'Train Accuracy Average':accavg, 'Train Accur
                                    'Validation Accuracy Average': valAccuracyAvg, 'Validation Accuracy std': valAccuracystd, 
                                    'Validation Loss Average': valLOSSavg, 'Validation Loss Std':valLOSSstd})
 
+x = range(len(trainValStatistics))
 plt.figure(figsize=(14,10))
 sns.lineplot(data=trainValStatistics, x=x, y='Train Accuracy Average', label='Training Accuracy Average')
 plt.fill_between(x, trainValStatistics['Train Accuracy Average'] - trainValStatistics['Train Accuracy Std'], trainValStatistics['Train Accuracy Average'] + trainValStatistics['Train Accuracy Std'], alpha=0.3, label='Train Accuracy StD')
@@ -285,5 +286,6 @@ sns.lineplot(data=trainValStatistics, x=x, y='Validation Accuracy Average', labe
 plt.fill_between(x, trainValStatistics['Validation Accuracy Average'] - trainValStatistics['Validation Accuracy std'], trainValStatistics['Validation Accuracy Average'] + trainValStatistics['Validation Accuracy std'], alpha=0.3, label='Validation Accuracy StD')
 sns.lineplot(data=trainValStatistics, x=x, y='Validation Loss Average', label='Validation Loss Average')
 plt.fill_between(x, trainValStatistics['Validation Loss Average'] - trainValStatistics['Validation Loss Std'], trainValStatistics['Validation Loss Average'] + trainValStatistics['Validation Loss Std'], alpha=0.3, label='Validation Loss StD')
+plt.show()
 
 
