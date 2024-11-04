@@ -218,7 +218,17 @@ optimizer = torch.optim.Adam(model.parameters(), lr=lr) #, momentum=momentum)
 
 # Performance measuring variables, loss, accuracy and number of epochs.
 LOSS = []
+LOSSavg = []
+LOSSstd = []
 accuracy = []
+accavg = []
+accstd = []
+valLOSS = []
+valLOSSavg = []
+valLOSSstd = []
+valAccuracy = []
+valAccuracyAvg = []
+valAccuracystd = []
 epochs = 1000
 
 # Training cycle
@@ -232,22 +242,49 @@ for epoch in range(epochs):
         loss = criterion(yhat, y.view(-1, 1))
         loss.backward()
         optimizer.step()
-    LOSS.append(loss.item())
-    yhat2 = model(x)
-    y2 = (yhat2 >= 0.5).float()
-    accuracy.append((yhat2.view(-1) == y.view(-1)).float().mean())
+        LOSS.append(loss.item())
+        y2 = (yhat >= 0.5).float()
+        accuracy.append((y2.view(-1) == y.view(-1)).float().mean())
+    accavg.append(np.array(accuracy).mean())
+    accstd.append(np.array(accuracy).std())
+    accuracy = []
+    LOSSavg.append(np.array(LOSS).mean())
+    LOSSstd.append(np.array(LOSS).std())
+    LOSS = []
+    
+    for x, y in validLoader:
+        model.eval()
+        yhat = model(x)
+        valloss = criterion(yhat, y.view(-1, 1))
+        y2 = (yhat >= 0.5).float()
+        valAccuracy.append((y2.view(-1) == y.view(-1)).float().mean())
+        valLOSS.append(valloss.item())
+    valLOSSavg.append(np.array(valLOSS).mean())
+    valLOSSstd.append(np.array(valLOSS).std())
+    valLOSS = []
+    valAccuracyAvg.append(np.array(valAccuracy).mean())
+    valAccuracystd.append(np.array(valAccuracy).std())
+    valAccuracy = []
  
 end_time = time.time()   
 total_time = end_time - start_time
 print(f"Training time: {total_time:.2f} seconds")
+
+# This Dataframe contains the statistical characteristics of every epoch for training and validation.
+trainValStatistics = pd.DataFrame({'Train Accuracy Average':accavg, 'Train Accuracy Std':accstd, 
+                                   'Train Loss Average': LOSSavg, 'Train Loss Std': LOSSstd, 
+                                   'Validation Accuracy Average': valAccuracyAvg, 'Validation Accuracy std': valAccuracystd, 
+                                   'Validation Loss Average': valLOSSavg, 'Validation Loss Std':valLOSSstd})
+
+plt.figure(figsize=(10,5))
  
-plt.figure(figsize=(10, 5))
-plt.plot(LOSS, label='Training Loss', color='blue')
-plt.plot(accuracy, label='Training accuracy', color='red')
-plt.title('Training Loss and Accuracy over Epochs')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend()
-plt.grid(True)
-plt.show()
+# plt.figure(figsize=(10, 5))
+# plt.plot(LOSS, label='Training Loss', color='blue')
+# plt.plot(accuracy, label='Training accuracy', color='red')
+# plt.title('Training Loss and Accuracy over Epochs')
+# plt.xlabel('Epochs')
+# plt.ylabel('Loss')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
 
