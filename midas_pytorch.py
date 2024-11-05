@@ -274,8 +274,8 @@ for epoch in range(epochs):
         print(f'Passing epoch {epoch:.0f} after {epoch_time:.2f} minutes.')
  
 end_time = time.time()   
-total_time = end_time - start_time
-print(f"Training time: {total_time:.2f} seconds")
+total_time = (end_time - start_time)/60
+print(f"Training time: {total_time:.2f} minutes")
 
 # This Dataframe contains the statistical characteristics of every epoch for training and validation.
 trainValStatistics = pd.DataFrame({'Train Accuracy Average':accavg, 'Train Accuracy Std':accstd, 
