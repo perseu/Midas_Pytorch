@@ -21,14 +21,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 # Dataset builder class
 class Data(Dataset):
     def __init__(self, df, target_col):
-        # Dropping client ID
-        #df = df.drop(['customer_id', 'historical_default'], axis=1)
-        #to_dummies = ['loan_intent', 'loan_grade', 'home_ownership']
-        #df_final = pd.get_dummies(data=df, columns=to_dummies)
-        #bool_cols = df_final.select_dtypes(include='bool').columns
-        #df_final[bool_cols] = df_final[bool_cols].astype(float)
-        
-        # Prepared to separate the features and targets.
+        # Separating the features and targets.
         df_feat = df[['customer_age', 'customer_income', 'employment_duration', 'loan_amnt',
                             'loan_int_rate', 'term_years', 'cred_hist_length', 'loan_intent_DEBTCONSOLIDATION', 
                             'loan_intent_EDUCATION', 'loan_intent_HOMEIMPROVEMENT', 
