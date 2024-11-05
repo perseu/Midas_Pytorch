@@ -269,7 +269,9 @@ for epoch in range(epochs):
     valAccuracy = []
     
     if epoch%10 == 0:                          # This cycle prints out the epoch number every 10 epochs.
-        print(f'Passing epoch {epoch:.0f}  ')
+        epoch_time = time.time()
+        epoch_time = (epoch_time - start_time)/60             # Converts from seconds to minutes.
+        print(f'Passing epoch {epoch:.0f} after {epoch_time:.2f} minutes.')
  
 end_time = time.time()   
 total_time = end_time - start_time
