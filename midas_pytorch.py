@@ -252,19 +252,24 @@ for epoch in range(epochs):
     LOSSstd.append(np.array(LOSS).std())
     LOSS = []
     
-    for x, y in validLoader:
-        model.eval()
-        yhat = model(x)
-        valloss = criterion(yhat, y.view(-1, 1))
-        y2 = (yhat >= 0.5).float()
-        valAccuracy.append((y2.view(-1) == y.view(-1)).float().mean())
-        valLOSS.append(valloss.item())
+    with torch.no_grad():
+        for x, y in validLoader:
+            model.eval()
+            yhat = model(x)
+            valloss = criterion(yhat, y.view(-1, 1))
+            y2 = (yhat >= 0.5).float()
+            valAccuracy.append((y2.view(-1) == y.view(-1)).float().mean())
+            valLOSS.append(valloss.item())
+            
     valLOSSavg.append(np.array(valLOSS).mean())
     valLOSSstd.append(np.array(valLOSS).std())
     valLOSS = []
     valAccuracyAvg.append(np.array(valAccuracy).mean())
     valAccuracystd.append(np.array(valAccuracy).std())
     valAccuracy = []
+    
+    if epoch%10 == 0:                          # This cycle prints out the epoch number every 10 epochs.
+        print(f'Passing epoch {epoch:.0f}  ')
  
 end_time = time.time()   
 total_time = end_time - start_time
