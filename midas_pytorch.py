@@ -307,5 +307,5 @@ print('The predictions for the 4 cases that had "NaN" in the :')
 for ii in range(len(df_to_predict_normalized)):
     print(df_to_predict.iloc[ii])
     print('result: ')
-    print('No Default\n\n') if model(torch.tensor(df_to_predict_normalized[3]).type(torch.FloatTensor)).item() == 1.0 else print('Default\n\n')
+    print('NO DEFAULT\n\n') if model(torch.tensor(df_to_predict_normalized[3]).type(torch.FloatTensor)).item() == 1.0 else print('DEFAULT\n\n')
     
