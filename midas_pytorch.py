@@ -296,3 +296,23 @@ plt.fill_between(x, trainValStatistics['Validation Loss Average'] - trainValStat
 plt.show()
 
 
+################################################################ Prediction ###########################################################################
+
+# Predicting if the clients that we took from the Dataset are going to go into Default or not. 
+
+# First we clean and fix a few things, we remove the 'Current_loan_status' because that is our target, and there is a "nan" value that is going to be substituted by the average value.
+
+#######################################################################################################################################################
+
+df_to_predict.loc[22742, 'loan_int_rate'] = df['loan_int_rate'].mean()    # This is a cell that I saw that has a NaN value. This is not the most versatile code. I know.
+
+df_to_predict.drop('Current_loan_status', axis=1)                         # Dropping the target column, it does not have any information anyway.
+df_to_predict_normalized=scaler.transform(df_to_predict[res])             # This line normalizes the input values, so that the model only gets values between 0 and 1.
+
+print('The predictions for the 4 cases that had "NaN" in the :')
+
+for ii in range(len(df_to_predict_normalized)):
+    print(df_to_predict.iloc[ii])
+    print('result: ')
+    print('No Default\n\n') if model(torch.tensor(df_to_predict_normalized[3]).type(torch.FloatTensor)).item() == 1.0 else print('Default\n\n')
+    
