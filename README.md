@@ -1,7 +1,8 @@
 # Midas_Pytorch
 
 This is an exercise I did to practice the application of Machine Learning and Deep Learning to a possible real scenario. In this case, we want to see if a client who requests a loan can pay it back based on a series of parameters.
-Used Libs: time, numpy, matplotlib, seaborn, pandas, pytorch, and sklearn
+
+Used Libs: **time, numpy, matplotlib, seaborn, pandas, pytorch, and sklearn**
 
 # About Dataset
 ## Loan Default Prediction Dataset
